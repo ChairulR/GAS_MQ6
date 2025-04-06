@@ -1,0 +1,48 @@
+#include <WiFi.h>
+
+#define GAS_SENSOR_PIN 34  // Pin sensor gas MQ-2 (AOUT)
+#define BUZZER_PIN 25      // Pin buzzer
+#define LED_RED 26         // LED indikator merah
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+
+WiFiClient client;
+
+void setup() {
+    Serial.begin(115200);
+    pinMode(GAS_SENSOR_PIN, INPUT);
+    pinMode(BUZZER_PIN, OUTPUT);
+    pinMode(LED_RED, OUTPUT);
+
+    digitalWrite(BUZZER_PIN, LOW);
+    digitalWrite(LED_RED, LOW);
+
+    // Koneksi ke WiFi
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nWiFi Connected");
+}
+
+void loop() {
+    int gasValue = analogRead(GAS_SENSOR_PIN);
+    Serial.println("Gas Value: " + String(gasValue));
+
+    if (gasValue > 3000) { // Ambang batas deteksi kebocoran
+        digitalWrite(BUZZER_PIN, HIGH);
+        digitalWrite(LED_RED, HIGH);
+        sendNotification();
+    } else {
+        digitalWrite(BUZZER_PIN, LOW);
+        digitalWrite(LED_RED, LOW);
+    }
+    delay(2000);
+}
+
+void sendNotification() {
+    Serial.println("Gas leak detected! Sending notification...");
+    // Di sini bisa ditambahkan fungsi untuk mengirim notifikasi via MQTT, Firebase, atau lainnya.
+}
